@@ -7,8 +7,20 @@ class fundamentalDiagram(ABC):
     parameters: dict = {}
 
     @abstractmethod
-    def calculate_flowrate(self, density: np.ndarray) -> int:
+    def velocity_at(self, density: np.ndarray) -> np.ndarray:
         pass
+
+    def flowrate_at(self, density: np.ndarray) -> np.ndarray:
+        """Hydrodynamic Relationship - true for all fundamental diagrams
+
+        Args:
+            density (np.ndarray): Vehicle Density in veh/m
+
+        Returns:
+            flowrate: The flowrate for the given densities in veh/s
+        """
+        flowrate = density * self.velocity_at(density)
+        return flowrate
 
 
 class Greenshields(fundamentalDiagram):
@@ -18,20 +30,15 @@ class Greenshields(fundamentalDiagram):
         self.parameters["speedLimit"] = speedLimit
         self.parameters["jamDensity"] = jamDensity
 
-    def calculate_flowrate(self, density) -> int:
-        flowrate = (
-            density
-            * self.parameters["speedLimit"]
-            * (1 - density / self.parameters["jamDensity"])
+    def velocity_at(self, density) -> np.ndarray:
+        velocity = self.parameters["speedLimit"] * (
+            1 - density / self.parameters["jamDensity"]
         )
-        return flowrate
+        return velocity
 
-    def plot(
-        self,
-        quantity="flowrate",
-    ) -> None:
+    def plot(self, quantity="flowrate") -> None:
         densityAxis = np.arange(0, self.parameters["jamDensity"] + 1, 1)
-        flowrateResponse = self.calculate_flowrate(densityAxis)
+        flowrateResponse = self.flowrate_at(densityAxis)
 
         plt.plot(densityAxis, flowrateResponse)
         plt.xlabel("Density [veh/m]")

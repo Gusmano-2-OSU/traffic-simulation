@@ -1,7 +1,7 @@
 [project]
 name = "traffic-simulation"
 version = "0.1.0"
-description = "Experimentign with Traffic Simulation in Python"
+description = "Experimenting with Traffic Simulation in Python"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
