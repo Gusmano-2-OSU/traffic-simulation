@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod
 
 
 class fundamentalDiagram(ABC):
-    parameters: dict = {}
-
     @abstractmethod
     def velocity_at(self, density: np.ndarray) -> np.ndarray:
         pass
@@ -22,51 +20,43 @@ class fundamentalDiagram(ABC):
         flowrate = density * self.velocity_at(density)
         return flowrate
 
+    @abstractmethod
+    def plot(self, quantity="flowrate") -> None:
+        pass
+
 
 class Greenshields(fundamentalDiagram):
-    parameters: dict = {"speedLimit": 10, "jamDensity": 160}
-
-    def __init__(self, speedLimit=65, jamDensity=160):
-        self.parameters["speedLimit"] = speedLimit
-        self.parameters["jamDensity"] = jamDensity
+    def __init__(self, speed_limit=65, jam_density=160):
+        self.speed_limit = speed_limit
+        self.jam_density = jam_density
 
     def velocity_at(self, density) -> np.ndarray:
-        velocity = self.parameters["speedLimit"] * (
-            1 - density / self.parameters["jamDensity"]
+        velocity = self.speed_limit * (
+            1 - density / self.jam_density
         )
         return velocity
 
     def plot(self, quantity="flowrate") -> None:
-        densityAxis = np.arange(0, self.parameters["jamDensity"] + 1, 1)
+        densityAxis = np.arange(0, self.jam_density + 1, 1)
         flowrateResponse = self.flowrate_at(densityAxis)
 
         plt.plot(densityAxis, flowrateResponse)
         plt.xlabel("Density [veh/m]")
         plt.ylabel("Flowrate [veh/s]")
         plt.grid(visible=True, which="both")
-        plt.xlim(0, self.parameters["jamDensity"])
+        plt.xlim(0, self.jam_density)
         plt.ylim(bottom=0, top=1.1 * max(flowrateResponse))
         plt.show()
 
 
 class link:
-    speedLimit: int = 10
-    length: int = 10.2
-    maxDensity: int = 160
-
-    def __init__(self, speedLimit=10, length=10.2):
-        self.speedLimit = speedLimit
+    def __init__(self, speed_limit=10, length=10.2, max_density=160):
+        self.speed_limit = speed_limit
         self.length = length
+        self.max_density = max_density
 
 
 class road:
-    __name__: str = "Road"
-    link_instance: link = link()
-
-    def __init__(self, name="Road", link_instance=link()):
+    def __init__(self, name="Road", road_links=link()):
         self.__name__ = name
-        self.link_instance = link
-
-
-fd = Greenshields()
-fd.plot()
+        self.link = road_links
